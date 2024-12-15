@@ -22,7 +22,7 @@ export default function HomeScreen() {
 
       {/* Kartu Order Now */}
       <TouchableOpacity style={styles.orderNowButton}>
-        <ThemedText style={styles.orderNowButtonText}>Order Now</ThemedText>
+        <ThemedText style={styles.orderNowButtonText}>Pesan Sekarang</ThemedText>
       </TouchableOpacity>
 
       {/* Bagian Services */}
@@ -35,20 +35,20 @@ export default function HomeScreen() {
 
       {/* Bagian Latest Orders */}
       <View style={styles.latestOrders}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>Latest Orders</ThemedText>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>Pesanan Terbaru</ThemedText>
         <OrderCard
           orderId="#1234"
           service="Regular Wash + Iron"
           status="Completed"
           time="2 hours ago"
-          price="$24.99"
+          price="Rp.18.000"
         />
         <OrderCard
           orderId="#1233"
           service="Dry Cleaning"
           status="In Progress"
           time="Yesterday"
-          price="$35.50"
+          price="Rp.10.000"
         />
       </View>
 
