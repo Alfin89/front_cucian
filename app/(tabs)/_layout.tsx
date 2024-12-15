@@ -1,15 +1,16 @@
-import { Tabs } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import React from 'react';
-import { Platform, View, Text, StyleSheet } from 'react-native';
+import { Platform, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons'; 
 import { Ionicons } from '@expo/vector-icons'; 
 
-import { HapticTab } from '@/components/HapticTab';
+import { Tabs } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const navigation = useNavigation();
 
   return (
     <>
@@ -17,8 +18,15 @@ export default function TabLayout() {
       <View style={styles.topBar}>
         <Text style={styles.logoText}>Cucian</Text>
         <View style={styles.iconContainer}>
-          <Feather name="bell" size={24} color="black" style={styles.topBarIcon} />
-          <Feather name="user" size={24} color="black" style={styles.topBarIcon} />
+          {/* Bell Icon dengan Navigasi */}
+          <TouchableOpacity onPress={() => navigation.navigate('notifications')}>
+            <Feather name="bell" size={24} color="black" style={styles.topBarIcon} />
+          </TouchableOpacity>
+
+          {/* User Icon */}
+          <TouchableOpacity onPress={() => navigation.navigate('account')}>
+            <Feather name="user" size={24} color="black" style={styles.topBarIcon} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -37,7 +45,7 @@ export default function TabLayout() {
           },
         }}
       >
-        {/* Home - Paling Kiri */}
+        {/* Home */}
         <Tabs.Screen
           name="index"
           options={{
@@ -55,7 +63,7 @@ export default function TabLayout() {
           }}
         />
 
-        {/* Promosi */}
+        {/* Promos */}
         <Tabs.Screen
           name="promos"
           options={{
@@ -94,7 +102,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   topBarIcon: {
-    marginLeft: 8,
+    marginLeft: 12,
   },
   logoText: {
     fontSize: 20,
