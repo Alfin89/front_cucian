@@ -1,8 +1,41 @@
-import { Image, ImageBackground, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Image,
+  ImageBackground,
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
+} from 'react-native';
+import axios from 'axios';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  const [laundries, setLaundries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLaundries = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/laundries'); // Ubah ke IP perangkat
+        if (response.data && response.data.length > 0) {
+          setLaundries(response.data); // Simpan data di state
+        } else {
+          console.warn('Data kosong dari API!');
+        }
+      } catch (error) {
+        console.error('Error fetching laundries:', error);
+      } finally {
+        setLoading(false); // Set loading selesai
+      }
+    };
+
+    fetchLaundries();
+  }, []);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Bagian Header */}
@@ -25,31 +58,33 @@ export default function HomeScreen() {
         <ThemedText style={styles.orderNowButtonText}>Pesan Sekarang</ThemedText>
       </TouchableOpacity>
 
-      {/* Bagian Services */}
-      <View style={styles.services}>
-        <ServiceItem title="Wash" icon={require('@/assets/images/icon/wash.png')} />
-        <ServiceItem title="Iron" icon={require('@/assets/images/icon/iron.png')} />
-        <ServiceItem title="Dry Clean" icon={require('@/assets/images/icon/dryclean.png')} />
-        <ServiceItem title="Express" icon={require('@/assets/images/icon/express.png')} />
-      </View>
-
       {/* Bagian Latest Orders */}
       <View style={styles.latestOrders}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>Pesanan Terbaru</ThemedText>
-        <OrderCard
-          orderId="#1234"
-          service="Regular Wash + Iron"
-          status="Completed"
-          time="2 hours ago"
-          price="Rp.18.000"
-        />
-        <OrderCard
-          orderId="#1233"
-          service="Dry Cleaning"
-          status="In Progress"
-          time="Yesterday"
-          price="Rp.10.000"
-        />
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Laundry Terdekat
+        </ThemedText>
+
+        {/* Loader saat loading */}
+        {loading ? (
+          <ActivityIndicator size="large" color="#007bff" style={styles.loader} />
+        ) : laundries.length > 0 ? (
+          <FlatList
+            data={laundries}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <LaundryCard
+                name={item.name}
+                address={item.address}
+                phone={item.phone_number}
+                email={item.email}
+              />
+            )}
+          />
+        ) : (
+          <ThemedText style={styles.emptyText}>
+            Tidak ada data laundry tersedia. Silakan coba lagi nanti.
+          </ThemedText>
+        )}
       </View>
 
       {/* Bagian Promo di Footer */}
@@ -62,26 +97,14 @@ export default function HomeScreen() {
   );
 }
 
-function ServiceItem({ title, icon }) {
+// Komponen LaundryCard untuk menampilkan detail laundry
+function LaundryCard({ name, address, phone, email }) {
   return (
-    <View style={styles.serviceItem}>
-      <ThemedView style={[styles.serviceCard, styles.shadow]}>
-        <Image source={icon} style={styles.serviceIcon} />
-      </ThemedView>
-      <ThemedText style={styles.serviceText}>{title}</ThemedText>
-    </View>
-  );
-}
-
-function OrderCard({ orderId, service, status, time, price }) {
-  const statusStyle = status === "Completed" ? styles.statusCompleted : styles.statusInProgress;
-  return (
-    <ThemedView style={[styles.orderCard, styles.shadow]}>
-      <ThemedText style={styles.orderText}>{orderId}</ThemedText>
-      <ThemedText style={styles.orderText}>{service}</ThemedText>
-      <ThemedText style={[styles.orderText, statusStyle]}>{status}</ThemedText>
-      <ThemedText style={styles.orderText}>{time}</ThemedText>
-      <ThemedText style={styles.orderText}>{price}</ThemedText>
+    <ThemedView style={[styles.laundryCard, styles.shadow]}>
+      <ThemedText style={styles.laundryText}>🏢 {name}</ThemedText>
+      <ThemedText style={styles.laundryText}>📍 {address}</ThemedText>
+      <ThemedText style={styles.laundryText}>📞 {phone}</ThemedText>
+      <ThemedText style={styles.laundryText}>✉️ {email}</ThemedText>
     </ThemedView>
   );
 }
@@ -97,8 +120,8 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     width: '100%',
-    borderRadius: 16, 
-    overflow: 'hidden', 
+    borderRadius: 16,
+    overflow: 'hidden',
     marginBottom: 10,
   },
   header: {
@@ -127,41 +150,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 16, 
-    alignItems: 'center', 
-    marginVertical: 16, 
+    borderRadius: 16,
+    alignItems: 'center',
+    marginVertical: 16,
   },
   orderNowButtonText: {
     fontSize: 16,
-    color: '#ffffff', 
+    color: '#ffffff',
     fontWeight: 'bold',
-  },
-  services: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  serviceItem: {
-    flex: 1,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  serviceCard: {
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  serviceIcon: {
-    width: 48,
-    height: 48,
-  },
-  serviceText: {
-    fontSize: 11,
-    color: '#333333',
   },
   latestOrders: {
     marginBottom: 16,
@@ -171,23 +167,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#555555',
   },
-  orderCard: {
+  loader: {
+    marginVertical: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999999',
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+  laundryCard: {
     padding: 16,
     backgroundColor: '#ffffff',
     borderRadius: 8,
     marginBottom: 8,
   },
-  orderText: {
+  laundryText: {
     fontSize: 14,
     color: '#333333',
-  },
-  statusCompleted: {
-    color: '#28a745',
-    fontWeight: 'bold',
-  },
-  statusInProgress: {
-    color: '#007bff',
-    fontWeight: 'bold',
   },
   promo: {
     padding: 16,
